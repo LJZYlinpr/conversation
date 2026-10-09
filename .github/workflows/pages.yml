@@ -1,0 +1,50 @@
+name: Deploy Huihui Chat
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Prepare static site
+        env:
+          PUBLIC_API_BASE: ${{ vars.PUBLIC_API_BASE }}
+        run: |
+          mkdir -p _site
+          cp -R web/. _site/
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          value = os.environ.get("PUBLIC_API_BASE", "").rstrip("/")
+          (Path("_site") / "api-config.js").write_text(
+              "window.HUIHUI_API_BASE = " + json.dumps(value) + ";\n",
+              encoding="utf-8",
+          )
+          Path("_site/.nojekyll").touch()
+          PY
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

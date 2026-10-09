@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="description" content="与 Huihui Qwen3.8 27B 对话，支持 256K 上下文。">
+  <title>Huihui Chat</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='20' fill='%23151515'/%3E%3Cpath d='M20 17v30m24-30v30M20 32h24' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./api-config.js"></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+<svg class="icon-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-menu" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H5l-3 2v-10A8.5 8.5 0 0 1 10.5 3h2A8.5 8.5 0 0 1 21 11.5Z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="m10 3-1 3-3 1-3 3 2 2-1 4 4 2 2 3 3-1 3 1 2-3 3-2-1-4 1-3-3-2-2-3-3 1Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 19V5m-6 6 6-6 6 6"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 8a8 8 0 1 0 0 8M20 3v5h-5"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="m16 3 5 5-12 12-6 1 1-6L16 3ZM13 6l5 5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6m8-12 6 6-6 6M14 4l-4 16"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></symbol>
+</svg>
+<div id="sidebar-overlay" class="sidebar-overlay" hidden></div>
+<div class="app-shell">
+  <aside id="sidebar" class="sidebar" aria-label="对话记录">
+    <div class="sidebar-top"><a class="brand" href="./" aria-label="Huihui Chat 首页"><span class="brand-mark">H</span><span>Huihui Chat</span></a><button class="icon-button" id="sidebar-close" title="收起侧栏" aria-label="收起侧栏"><svg><use href="#i-menu"/></svg></button></div>
+    <button id="new-chat" class="new-chat"><svg><use href="#i-plus"/></svg><span>新对话</span><kbd>⌘ K</kbd></button>
+    <div class="history-label">你的对话</div>
+    <nav id="conversation-list" class="conversation-list" aria-label="历史对话"></nav>
+    <div class="sidebar-footer"><div class="model-card"><span class="model-status-dot"></span><div><strong>Huihui Qwen3.8</strong><span>27B · MTP · 256K 上下文</span></div></div><div class="footer-buttons"><button id="settings-open" class="footer-button"><svg><use href="#i-settings"/></svg>设置</button><button id="theme-toggle" class="icon-button" title="切换深色模式" aria-label="切换深色模式"><svg><use href="#i-sun"/></svg></button></div></div>
+  </aside>
+  <main class="main-panel">
+    <header class="topbar"><div class="topbar-left"><button id="sidebar-toggle" class="icon-button" title="打开侧栏" aria-label="打开侧栏"><svg><use href="#i-menu"/></svg></button><div class="model-heading"><strong>Huihui Chat</strong><span id="model-subtitle">Qwen3.8 27B · 256K</span></div></div><div id="connection-status" class="connection-status"><span></span><span class="connection-text">连接中</span></div></header>
+    <div id="chat-scroll" class="chat-scroll">
+      <section id="welcome" class="welcome"><div class="welcome-mark">H</div><p class="eyebrow">HUIHUI CHAT</p><h1>今天想聊些什么？</h1><p class="welcome-description">写作、代码、思考，从这里开始。<br>256K 上下文，让对话继续展开。</p><div class="suggestions"><button data-prompt="帮我把一个复杂问题拆解成清晰的思考步骤。"><svg><use href="#i-spark"/></svg><strong>一起想清楚</strong><span>拆解问题，找到新的思路</span></button><button data-prompt="你可以怎样帮助我编写和优化 Python 代码？"><svg><use href="#i-code"/></svg><strong>写点代码</strong><span>从想法到可以运行的代码</span></button><button data-prompt="帮我润色一段文字，让表达更简洁、自然。"><svg><use href="#i-edit"/></svg><strong>打磨文字</strong><span>让你的想法表达得更准确</span></button><button data-prompt="我想学习一个新领域，请帮我制定循序渐进的学习计划。"><svg><use href="#i-message"/></svg><strong>探索新知识</strong><span>带着好奇心，深入一个话题</span></button></div></section>
+      <section id="messages" class="messages" aria-label="对话内容" aria-live="polite" aria-relevant="additions"></section>
+    </div>
+    <div class="composer-area"><div id="conversation-error" class="conversation-error" role="alert" hidden></div><form id="composer-form" class="composer"><textarea id="prompt" rows="1" placeholder="发送消息给 Huihui…" aria-label="消息内容" spellcheck="false"></textarea><div class="composer-toolbar"><button type="button" id="thinking-shortcut" class="thinking-shortcut" aria-pressed="false"><svg><use href="#i-spark"/></svg><span>深度思考</span></button><span class="context-chip" title="发送完整对话历史，模型上下文上限为 262,144 tokens">256K 上下文</span><button type="submit" id="send-button" class="send-button" title="发送消息" aria-label="发送消息" disabled><svg><use href="#i-arrow"/></svg></button></div></form><p class="composer-note">对话记录保存在当前浏览器。<span>Enter 发送 · Shift + Enter 换行</span></p></div>
+  </main>
+</div>
+<dialog id="settings-dialog" class="settings-dialog"><form method="dialog" class="dialog-inner"><div class="dialog-heading"><h2>对话设置</h2><button class="icon-button" aria-label="关闭设置" title="关闭"><svg><use href="#i-close"/></svg></button></div><div class="settings-row"><div><label for="setting-thinking">深度思考</label><p>展示模型的思考过程，回答可能需要更长时间。</p></div><input id="setting-thinking" type="checkbox" class="switch"/></div><div class="settings-field"><div class="field-heading"><label for="setting-temperature">创造性</label><output id="temperature-value">1.0</output></div><input id="setting-temperature" type="range" min="0" max="2" step="0.1" value="1"><div class="range-labels"><span>更确定</span><span>更发散</span></div></div><div class="settings-field"><label for="setting-output">单次回答长度上限</label><select id="setting-output"><option value="4096">4,096 tokens</option><option value="8192">8,192 tokens</option><option value="16384">16,384 tokens</option><option value="32768" selected>32,768 tokens</option><option value="65536">65,536 tokens</option></select><p>实际长度受剩余上下文空间影响。</p></div><div class="settings-field"><label for="setting-system">系统提示词 <span class="muted">可选</span></label><textarea id="setting-system" rows="4" placeholder="例如：请始终使用中文，并优先给出简洁的答案。"></textarea><p>每次请求都会发送完整对话，最多 256K 上下文。</p></div><button id="settings-save" class="primary-button" value="save">保存设置</button></form></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
