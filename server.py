@@ -30,6 +30,8 @@ CONTEXT_SIZE = int(os.environ.get("CHAT_CONTEXT_SIZE", "262144"))
 MAX_OUTPUT = 65536
 MAX_BODY = 32 * 1024 * 1024
 REASONING_MAX = 8192
+# Verified from this Huihui GGUF's /tokenize endpoint with parse_special=true.
+THINK_START_TOKEN_ID = int(os.environ.get("CHAT_THINK_START_TOKEN_ID", "248068"))
 COMPRESSION_THRESHOLD = 0.85
 REASONING_LEVELS = {
     "fast": (0, "none"), "light": (2048, "low"),
@@ -160,6 +162,10 @@ def model_payload(messages, reasoning, **options):
                "reasoning_budget_start_tag": "<think>",
                "reasoning_budget_end_tags": ["</think>"],
                "chat_template_kwargs": reasoning["template"], "cache_prompt": True}
+    if reasoning["budget"]:
+        # The first <think> is already in the template's prompt. Prevent a second
+        # generated thinking block from resetting the native per-block budget.
+        payload["logit_bias"] = [[THINK_START_TOKEN_ID, False]]
     payload.update(options)
     return payload
 
